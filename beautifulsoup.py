@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 import sqlite3
 import re
 
@@ -58,22 +59,37 @@ for comuna_href in href:
     else:
         print("No se pudo hacer conexion a la pagina")
 
-for comuna, poblacion, coordenada in zip(comunas, poblacion_total, coordenadas):
-    print("Comuna:", comuna)
-    print("Habitantes:", poblacion)
-    print("Coordenadas:", coordenada)
-    print("-----------------------------------")
+df_pandas=pd.read_html(url, attrs = {'class': 'wikitable'})[0]
 
+alcaldes = df_pandas["Alcalde"].tolist() + df_pandas["Alcalde.1"].tolist()
+
+data = list(zip(comunas, coordenadas, poblacion_total))
+data.sort(key=lambda x: x[0])
+
+
+for i in range(len(comunas)):
+        nombre_comuna, (latitud, longitud), poblacion_ = data[i]
+        alcalde = alcaldes[i]
+        print("Comuna:", nombre_comuna)
+        print("Alcalde:", alcalde)
+        print("Habitantes:", poblacion)
+        print("Coordenadas:", latitud,longitud)
+        print("-----------------------------------")
 try:
-    sqliteConnection = sqlite3.connect("C:\\Proyectos\\beautifulsoup\\database.db")
+    sqliteConnection = sqlite3.connect("C:\\code\\beautifulsoup-test\\database.db")
     cursor = sqliteConnection.cursor()
+    cursor.execute("SELECT COUNT(*) FROM Coordenadas")
+    data_count = cursor.fetchone()[0]
+    if data_count > 0:
+        # Si hay datos, elimina los registros existentes en la tabla Comunas
+        cursor.execute("DELETE FROM Coordenadas")
+        print("Se han eliminado los datos anteriores de la base de datos.")
 
     for i in range(len(comunas)):
-        nombre_comuna = comunas[i]
-        latitud, longitud = coordenadas[i]
-        poblacion_ = poblacion_total[i]
-
-        cursor.execute("INSERT INTO Coordenadas(Comuna, Latitud, Longitud, Poblacion) VALUES (?, ?, ?, ?)", (nombre_comuna, latitud, longitud, poblacion_,))
+            nombre_comuna, (latitud, longitud), poblacion_ = data[i]
+            alcalde = alcaldes[i]
+            cursor.execute("INSERT INTO Coordenadas(Comuna, Latitud, Longitud, Poblacion, Alcalde) VALUES (?, ?, ?, ?, ?)",
+                        (nombre_comuna, latitud, longitud, poblacion_, alcalde))
         
     sqliteConnection.commit()
     cursor.close()

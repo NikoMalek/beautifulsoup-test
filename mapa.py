@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 #melbourne = (-37.840935, 144.946457)
 osorno=(-40.57611891208618, -73.11679310991)
-server='192.168.43.133'
+server='192.168.1.8'
 
 @app.route("/")
 def base():
@@ -20,11 +20,11 @@ def base():
     )
     
     try:
-        sqliteConnection = sqlite3.connect("C:\\Proyectos\\beautifulsoup\\database.db")
+        sqliteConnection = sqlite3.connect("C:\\code\\beautifulsoup-test\\database.db")
         cursor = sqliteConnection.cursor()
         print("Connected to SQLite")
 
-        sqlite_select_query = """SELECT Comuna, Latitud, Longitud, Poblacion FROM Coordenadas;"""
+        sqlite_select_query = """SELECT Comuna, Latitud, Longitud, Poblacion, Alcalde FROM Coordenadas;"""
     
         cursor.execute(sqlite_select_query)
     
@@ -42,7 +42,7 @@ def base():
                         opacity=1,
                         fill_color="green",
                         fill=False,  # gets overridden by fill_color
-                        popup='{} habitantes.'.format(item[3]),
+                        popup='Alcalde: {}'.format(item[4]),
                         tooltip=item[0],).add_to(map)
         
         cursor.close()
