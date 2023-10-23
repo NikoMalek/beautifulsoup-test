@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 #melbourne = (-37.840935, 144.946457)
 osorno=(-40.57611891208618, -73.11679310991)
-server='192.168.1.8'
+server='127.0.0.1'
 
 @app.route("/")
 def base():
@@ -42,8 +42,8 @@ def base():
                         opacity=1,
                         fill_color="green",
                         fill=False,  # gets overridden by fill_color
-                        popup='Alcalde: {}'.format(item[4]),
-                        tooltip=item[0],).add_to(map)
+                        popup='<h4><b>Comuna:</b> {}</h4><h4><b>Alcalde:</b> {}</h4><h4><b>Habitantes:</b> {}</h4>'.format(item[0],item[4],item[3]),
+                        tooltip='<h4><b>{}</b></h4>'.format(item[0]),).add_to(map)
         
         cursor.close()
 
